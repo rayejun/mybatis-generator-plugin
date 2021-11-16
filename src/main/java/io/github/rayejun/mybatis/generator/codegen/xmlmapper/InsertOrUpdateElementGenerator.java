@@ -127,7 +127,7 @@ public class InsertOrUpdateElementGenerator extends AbstractXmlElementGenerator 
 
         for (int i = 0; i < columns.size(); i++) {
             IntrospectedColumn introspectedColumn = columns.get(i);
-            valuesClause.append(introspectedColumn.getActualColumnName());
+            valuesClause.append(MyBatis3FormattingUtilities.getEscapedColumnName(introspectedColumn));
             valuesClause.append(" = ");
             valuesClause.append(MyBatis3FormattingUtilities.getParameterClause(introspectedColumn));
             if (i + 1 < columns.size()) {
