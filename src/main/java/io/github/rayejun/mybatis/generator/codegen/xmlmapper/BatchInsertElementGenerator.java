@@ -78,8 +78,7 @@ public class BatchInsertElementGenerator extends AbstractXmlElementGenerator {
         StringBuilder valuesClause = new StringBuilder();
 
         List<String> valuesClauses = new ArrayList<>();
-        List<IntrospectedColumn> columns =
-                ListUtilities.removeIdentityAndGeneratedAlwaysColumns(introspectedTable.getAllColumns());
+        List<IntrospectedColumn> columns = ListUtilities.removeIdentityAndGeneratedAlwaysColumns(introspectedTable.getAllColumns());
         for (int i = 0; i < columns.size(); i++) {
             IntrospectedColumn introspectedColumn = columns.get(i);
 
@@ -100,13 +99,13 @@ public class BatchInsertElementGenerator extends AbstractXmlElementGenerator {
                 valuesClause.append(", "); //$NON-NLS-1$
             }
 
-            if (insertClause.length() > 80) {
+            if (insertClause.length() > 80 && i + 1 != columns.size()) {
                 answer.addElement(new TextElement(insertClause.toString()));
                 insertClause.setLength(0);
                 OutputUtilities.xmlIndent(insertClause, 1);
             }
 
-            if (valuesClause.length() > 80) {
+            if (valuesClause.length() > 80 && i + 1 != columns.size()) {
                 valuesClauses.add(valuesClause.toString());
                 valuesClause.setLength(0);
                 OutputUtilities.xmlIndent(valuesClause, 1);

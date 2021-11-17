@@ -79,68 +79,94 @@ public class InsertOrUpdateElementGenerator extends AbstractXmlElementGenerator 
         StringBuilder insertClause = new StringBuilder();
 
         insertClause.append("insert into "); //$NON-NLS-1$
-        insertClause.append(introspectedTable
-                .getFullyQualifiedTableNameAtRuntime());
-        insertClause.append(" ("); //$NON-NLS-1$
+        insertClause.append(introspectedTable.getFullyQualifiedTableNameAtRuntime());
+
+        answer.addElement(new TextElement(insertClause.toString()));
+        insertClause.setLength(0);
 
         StringBuilder valuesClause = new StringBuilder();
-        valuesClause.append("values ("); //$NON-NLS-1$
 
-        List<String> valuesClauses = new ArrayList<>();
-        List<IntrospectedColumn> columns =
-                ListUtilities.removeIdentityAndGeneratedAlwaysColumns(introspectedTable.getAllColumns());
+        StringBuilder updateClause = new StringBuilder();
+
+        StringBuilder sb = new StringBuilder();
+
+        XmlElement insertTrimElement = new XmlElement("trim"); //$NON-NLS-1$
+        insertTrimElement.addAttribute(new Attribute("prefix", "(")); //$NON-NLS-1$ //$NON-NLS-2$
+        insertTrimElement.addAttribute(new Attribute("suffix", ")")); //$NON-NLS-1$ //$NON-NLS-2$
+        insertTrimElement.addAttribute(new Attribute("suffixOverrides", ",")); //$NON-NLS-1$ //$NON-NLS-2$
+
+        XmlElement valuesTrimElement = new XmlElement("trim"); //$NON-NLS-1$
+        valuesTrimElement.addAttribute(new Attribute("prefix", "(")); //$NON-NLS-1$ //$NON-NLS-2$
+        valuesTrimElement.addAttribute(new Attribute("suffix", ")")); //$NON-NLS-1$ //$NON-NLS-2$
+        valuesTrimElement.addAttribute(new Attribute("suffixOverrides", ",")); //$NON-NLS-1$ //$NON-NLS-2$
+
+        XmlElement updateTrimElement = new XmlElement("trim"); //$NON-NLS-1$
+        updateTrimElement.addAttribute(new Attribute("suffixOverrides", ",")); //$NON-NLS-1$ //$NON-NLS-2$
+
+        List<IntrospectedColumn> columns = introspectedTable.getAllColumns();
         for (int i = 0; i < columns.size(); i++) {
             IntrospectedColumn introspectedColumn = columns.get(i);
 
-            insertClause.append(MyBatis3FormattingUtilities
-                    .getEscapedColumnName(introspectedColumn));
-            valuesClause.append(MyBatis3FormattingUtilities
-                    .getParameterClause(introspectedColumn));
-            if (i + 1 < columns.size()) {
-                insertClause.append(", "); //$NON-NLS-1$
-                valuesClause.append(", "); //$NON-NLS-1$
+            insertClause.append(MyBatis3FormattingUtilities.getEscapedColumnName(introspectedColumn));
+            valuesClause.append(MyBatis3FormattingUtilities.getParameterClause(introspectedColumn));
+            updateClause.append(MyBatis3FormattingUtilities.getEscapedColumnName(introspectedColumn));
+            updateClause.append(" = ");
+            updateClause.append(MyBatis3FormattingUtilities.getParameterClause(introspectedColumn));
+            insertClause.append(", "); //$NON-NLS-1$
+            valuesClause.append(", "); //$NON-NLS-1$
+            updateClause.append(", "); //$NON-NLS-1$
+
+            if (introspectedColumn.isIdentity()) {
+                sb.setLength(0);
+                sb.append(introspectedColumn.getJavaProperty());
+                sb.append(" != null"); //$NON-NLS-1$
+                XmlElement insertNotNullElement = new XmlElement("if"); //$NON-NLS-1$
+                insertNotNullElement.addAttribute(new Attribute("test", sb.toString())); //$NON-NLS-1$
+                insertNotNullElement.addElement(new TextElement(insertClause.toString()));
+                insertTrimElement.addElement(insertNotNullElement);
+                insertClause.setLength(0);
+
+                XmlElement valueNotNullElement = new XmlElement("if"); //$NON-NLS-1$
+                valueNotNullElement.addAttribute(new Attribute("test", sb.toString())); //$NON-NLS-1$
+                valueNotNullElement.addElement(new TextElement(valuesClause.toString()));
+                valuesTrimElement.addElement(valueNotNullElement);
+                valuesClause.setLength(0);
+
+                XmlElement updateNotNullElement = new XmlElement("if"); //$NON-NLS-1$
+                updateNotNullElement.addAttribute(new Attribute("test", sb.toString())); //$NON-NLS-1$
+                updateNotNullElement.addElement(new TextElement(updateClause.toString()));
+                updateTrimElement.addElement(updateNotNullElement);
+                updateClause.setLength(0);
+
+                continue;
             }
 
-            if (valuesClause.length() > 80) {
-                answer.addElement(new TextElement(insertClause.toString()));
+            if (insertClause.length() > 80 && i + 1 != columns.size()) {
+                insertTrimElement.addElement(new TextElement(insertClause.toString()));
                 insertClause.setLength(0);
                 OutputUtilities.xmlIndent(insertClause, 1);
-
-                valuesClauses.add(valuesClause.toString());
+            }
+            if (valuesClause.length() > 80 && i + 1 != columns.size()) {
+                valuesTrimElement.addElement(new TextElement(valuesClause.toString()));
                 valuesClause.setLength(0);
                 OutputUtilities.xmlIndent(valuesClause, 1);
             }
+            if (updateClause.length() > 80 && i + 1 != columns.size()) {
+                updateTrimElement.addElement(new TextElement(updateClause.toString()));
+                updateClause.setLength(0);
+                OutputUtilities.xmlIndent(updateClause, 1);
+            }
+
         }
+        insertTrimElement.addElement(new TextElement(insertClause.toString()));
+        valuesTrimElement.addElement(new TextElement(valuesClause.toString()));
+        updateTrimElement.addElement(new TextElement(updateClause.toString()));
 
-        insertClause.append(')');
-        answer.addElement(new TextElement(insertClause.toString()));
-
-        valuesClause.append(')');
-        valuesClauses.add(valuesClause.toString());
-
-        for (String clause : valuesClauses) {
-            answer.addElement(new TextElement(clause));
-        }
-
+        answer.addElement(insertTrimElement);
+        answer.addElement(new TextElement("values"));
+        answer.addElement(valuesTrimElement);
         answer.addElement(new TextElement("on duplicate key update "));
-        valuesClause.setLength(0);
-
-        for (int i = 0; i < columns.size(); i++) {
-            IntrospectedColumn introspectedColumn = columns.get(i);
-            valuesClause.append(MyBatis3FormattingUtilities.getEscapedColumnName(introspectedColumn));
-            valuesClause.append(" = ");
-            valuesClause.append(MyBatis3FormattingUtilities.getParameterClause(introspectedColumn));
-            if (i + 1 < columns.size()) {
-                valuesClause.append(", "); //$NON-NLS-1$
-            }
-
-            if (valuesClause.length() > 80 && i + 1 != columns.size()) {
-                answer.addElement(new TextElement(valuesClause.toString()));
-                valuesClause.setLength(0);
-            }
-        }
-
-        answer.addElement(new TextElement(valuesClause.toString()));
+        answer.addElement(updateTrimElement);
 
         parentElement.addElement(answer);
     }

@@ -75,8 +75,10 @@ public class InsertOrUpdateSelectiveElementGenerator extends
         insertTrimElement.addAttribute(new Attribute("suffixOverrides", ",")); //$NON-NLS-1$ //$NON-NLS-2$
         answer.addElement(insertTrimElement);
 
+        answer.addElement(new TextElement("values"));
+
         XmlElement valuesTrimElement = new XmlElement("trim"); //$NON-NLS-1$
-        valuesTrimElement.addAttribute(new Attribute("prefix", "values (")); //$NON-NLS-1$ //$NON-NLS-2$
+        valuesTrimElement.addAttribute(new Attribute("prefix", "(")); //$NON-NLS-1$ //$NON-NLS-2$
         valuesTrimElement.addAttribute(new Attribute("suffix", ")")); //$NON-NLS-1$ //$NON-NLS-2$
         valuesTrimElement.addAttribute(new Attribute("suffixOverrides", ",")); //$NON-NLS-1$ //$NON-NLS-2$
         answer.addElement(valuesTrimElement);
@@ -84,8 +86,7 @@ public class InsertOrUpdateSelectiveElementGenerator extends
         XmlElement updateTrimElement = new XmlElement("trim"); //$NON-NLS-1$
         updateTrimElement.addAttribute(new Attribute("suffixOverrides", ",")); //$NON-NLS-1$ //$NON-NLS-2$
 
-        for (IntrospectedColumn introspectedColumn :
-                ListUtilities.removeIdentityAndGeneratedAlwaysColumns(introspectedTable.getAllColumns())) {
+        for (IntrospectedColumn introspectedColumn : introspectedTable.getAllColumns()) {
 
             if (introspectedColumn.isSequenceColumn()
                     || introspectedColumn.getFullyQualifiedJavaType().isPrimitive()) {
