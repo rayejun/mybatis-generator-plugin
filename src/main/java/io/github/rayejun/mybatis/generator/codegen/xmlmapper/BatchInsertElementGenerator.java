@@ -126,9 +126,6 @@ public class BatchInsertElementGenerator extends AbstractXmlElementGenerator {
             element.addElement(new TextElement(clause));
         }
 
-        if (context.getPlugins().sqlMapInsertElementGenerated(answer,
-                introspectedTable)) {
-            parentElement.addElement(answer);
-        }
+        parentElement.addElement(answer);
     }
 }

@@ -48,12 +48,9 @@ public class InsertOrUpdateSelectiveMethodGenerator extends
 
         addMapperAnnotations(method);
 
-        if (context.getPlugins().clientInsertSelectiveMethodGenerated(
-                method, interfaze, introspectedTable)) {
-            addExtraImports(interfaze);
-            interfaze.addImportedTypes(importedTypes);
-            interfaze.addMethod(method);
-        }
+        addExtraImports(interfaze);
+        interfaze.addImportedTypes(importedTypes);
+        interfaze.addMethod(method);
     }
 
     public void addMapperAnnotations(Method method) {

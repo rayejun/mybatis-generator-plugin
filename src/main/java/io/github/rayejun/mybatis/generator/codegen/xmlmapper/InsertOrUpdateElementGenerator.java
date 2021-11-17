@@ -142,9 +142,6 @@ public class InsertOrUpdateElementGenerator extends AbstractXmlElementGenerator 
 
         answer.addElement(new TextElement(valuesClause.toString()));
 
-        if (context.getPlugins().sqlMapInsertElementGenerated(answer,
-                introspectedTable)) {
-            parentElement.addElement(answer);
-        }
+        parentElement.addElement(answer);
     }
 }

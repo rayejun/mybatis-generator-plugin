@@ -58,12 +58,9 @@ public class BatchInsertMethodGenerator extends AbstractJavaMapperMethodGenerato
 
         addMapperAnnotations(method);
 
-        if (context.getPlugins().clientInsertMethodGenerated(method, interfaze,
-                introspectedTable)) {
-            addExtraImports(interfaze);
-            interfaze.addImportedTypes(importedTypes);
-            interfaze.addMethod(method);
-        }
+        addExtraImports(interfaze);
+        interfaze.addImportedTypes(importedTypes);
+        interfaze.addMethod(method);
     }
 
     public void addMapperAnnotations(Method method) {

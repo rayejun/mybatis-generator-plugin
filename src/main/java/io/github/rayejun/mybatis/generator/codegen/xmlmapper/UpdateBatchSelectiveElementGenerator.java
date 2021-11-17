@@ -117,10 +117,6 @@ public class UpdateBatchSelectiveElementGenerator extends
             whereElement.addElement(new TextElement(sb.toString()));
         }
 
-        if (context.getPlugins()
-                .sqlMapUpdateByPrimaryKeySelectiveElementGenerated(answer,
-                        introspectedTable)) {
-            parentElement.addElement(answer);
-        }
+        parentElement.addElement(answer);
     }
 }

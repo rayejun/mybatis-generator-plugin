@@ -157,9 +157,6 @@ public class InsertOrUpdateSelectiveElementGenerator extends
         answer.addElement(new TextElement("on duplicate key update "));
         answer.addElement(updateTrimElement);
 
-        if (context.getPlugins().sqlMapInsertSelectiveElementGenerated(
-                answer, introspectedTable)) {
-            parentElement.addElement(answer);
-        }
+        parentElement.addElement(answer);
     }
 }
