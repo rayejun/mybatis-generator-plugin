@@ -134,7 +134,7 @@ public class InsertOrUpdateElementGenerator extends AbstractXmlElementGenerator 
                 valuesClause.append(", "); //$NON-NLS-1$
             }
 
-            if (valuesClause.length() > 80) {
+            if (valuesClause.length() > 80 && i + 1 != columns.size()) {
                 answer.addElement(new TextElement(valuesClause.toString()));
                 valuesClause.setLength(0);
             }

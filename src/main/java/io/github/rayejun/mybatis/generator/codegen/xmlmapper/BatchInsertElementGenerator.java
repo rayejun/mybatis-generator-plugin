@@ -113,6 +113,8 @@ public class BatchInsertElementGenerator extends AbstractXmlElementGenerator {
             }
         }
 
+        valuesClauses.add(valuesClause.toString());
+
         answer.addElement(new TextElement(insertClause.toString()));
         answer.addElement(new TextElement("values"));
 
